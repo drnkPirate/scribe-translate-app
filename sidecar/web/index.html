@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-i18n="title"></title>
+    <style>
+      :root { color-scheme: dark; --bg:#090b10; --panel:#121722; --line:#263044; --text:#f5f7fb; --muted:#9ba7b9; --accent:#8bb8ff; --danger:#ff8a8a; }
+      * { box-sizing: border-box; }
+      [hidden] { display:none !important; }
+      body { margin:0; min-height:100vh; background:radial-gradient(circle at 50% -20%,#1a2944 0,var(--bg) 45%); color:var(--text); font:16px/1.5 system-ui,sans-serif; }
+      main { width:min(920px,calc(100% - 32px)); margin:auto; padding:36px 0 64px; }
+      header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:28px; }
+      h1 { margin:0; font-size:clamp(1.4rem,4vw,2rem); letter-spacing:-.03em; }
+      .state { color:var(--muted); }
+      .state[data-kind="live"] { color:#83e6b5; }
+      .state[data-kind="error"] { color:var(--danger); }
+      .controls { display:grid; grid-template-columns:minmax(170px,1fr) auto auto; gap:12px; padding:16px; background:rgba(18,23,34,.92); border:1px solid var(--line); border-radius:18px; }
+      label { color:var(--muted); font-size:.82rem; }
+      select,input,button { min-height:44px; border-radius:11px; border:1px solid var(--line); background:#171e2b; color:var(--text); font:inherit; }
+      select,input { width:100%; padding:0 12px; }
+      button { padding:0 18px; font-weight:700; cursor:pointer; }
+      button.primary { background:var(--accent); color:#07101f; border-color:transparent; }
+      button:disabled { opacity:.45; cursor:not-allowed; }
+      .replay { display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:12px; padding:16px; border:1px solid var(--line); border-radius:18px; background:rgba(18,23,34,.72); }
+      .model-setup { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:18px; padding:16px 18px; border:1px solid #52698d; border-radius:18px; background:#121a28; }
+      .model-setup p { margin:0; color:var(--muted); }
+      .mode { margin:24px 2px 10px; color:var(--muted); font-size:.86rem; }
+      .error { min-height:24px; margin:10px 2px; color:var(--danger); }
+      .caption-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:24px 2px 12px; }
+      .caption-heading h2 { margin:0; font-size:1rem; }
+      .captions { display:flex; flex-direction:column-reverse; gap:12px; }
+      .caption { padding:22px 24px; border:1px solid var(--line); border-radius:18px; background:rgba(18,23,34,.9); box-shadow:0 18px 50px rgba(0,0,0,.18); }
+      .caption[data-final="false"] { border-color:#52698d; }
+      .french { margin:0 0 10px; font-size:clamp(1.45rem,4vw,2.35rem); line-height:1.25; letter-spacing:-.02em; }
+      .dutch { margin:0; color:var(--muted); font-size:.98rem; }
+      .meta { margin-top:12px; color:#748198; font-size:.78rem; }
+      .empty { padding:56px 20px; color:var(--muted); text-align:center; border:1px dashed var(--line); border-radius:18px; }
+      @media (max-width:650px) { .controls { grid-template-columns:1fr 1fr; } .device { grid-column:1/-1; } .replay { grid-template-columns:1fr; } .model-setup { align-items:stretch; flex-direction:column; } }
+      @media (prefers-reduced-motion:no-preference) { .caption { animation:arrive .25s ease-out; } @keyframes arrive { from { opacity:0; transform:translateY(8px); } } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><h1 data-i18n="title"></h1><span id="state" class="state" role="status" aria-live="polite"></span></header>
+      <section id="model-setup" class="model-setup">
+        <p data-i18n="modelDownload"></p>
+        <button id="download" class="primary" type="button" data-i18n="downloadModels"></button>
+      </section>
+      <section class="controls" aria-labelledby="live-heading">
+        <div class="device"><label id="live-heading" for="device" data-i18n="microphone"></label><select id="device"></select></div>
+        <button id="start" class="primary" type="button" data-i18n="start"></button>
+        <button id="stop" type="button" data-i18n="stop"></button>
+      </section>
+      <section class="replay" aria-labelledby="replay-heading">
+        <div><label id="replay-heading" for="file" data-i18n="replayFile"></label><input id="file" type="file" accept="audio/wav,.wav"></div>
+        <button id="replay" type="button" data-i18n="replay"></button>
+      </section>
+      <p id="mode" class="mode"></p>
+      <p id="error" class="error" role="alert" aria-live="assertive"></p>
+      <div class="caption-heading"><h2 data-i18n="captions"></h2><button id="reset" type="button" data-i18n="reset"></button></div>
+      <section id="captions" class="captions" aria-live="polite" aria-label=""></section>
+    </main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

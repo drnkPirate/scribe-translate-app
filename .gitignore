@@ -1,0 +1,8 @@
+.DS_Store
+.venv/
+build/pyinstaller/
+dist/
+node_modules/
+release/
+__pycache__/
+*.pyc

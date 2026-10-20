@@ -1,0 +1,10 @@
+ctranslate2==4.8.3
+huggingface-hub==0.36.2
+moondream==2.6.1
+numpy==2.5.4
+pyinstaller==6.22.3
+scipy==1.18.1
+sentencepiece==0.2.2
+silero-vad==6.2.3
+torch==2.14.1
+transformers==4.57.6

@@ -1,0 +1,48 @@
+{
+  "name": "scribe-translate-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Dutch transcription with live French captions",
+  "main": "main.cjs",
+  "scripts": {
+    "dev": "electron .",
+    "test": "node test/test_app.js && node scripts/python.cjs -m unittest test/test_server.py test/test_engine.py",
+    "build:sidecar": "node scripts/python.cjs scripts/build_sidecar.py",
+    "build:mac": "npm run build:sidecar && electron-builder --mac dir --arm64",
+    "build:win": "npm run build:sidecar && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "44.9.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.drnkpirate.scribetranslate",
+    "productName": "Scribe Translate",
+    "asar": true,
+    "files": ["main.cjs", "package.json"],
+    "extraResources": [{"from": "dist/sidecar", "to": "sidecar"}],
+    "directories": {"output": "release", "buildResources": "build"},
+    "mac": {
+      "target": ["dir"],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Scribe Translate uses the microphone for local live transcription and French captions."
+      },
+      "signIgnore": [
+        "/Contents/Resources/sidecar/.*\\.(py|pyi|json|txt|md|html|js|css|yaml|yml|spm|jinja)$"
+      ]
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.png",
+      "artifactName": "Scribe-Translate-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

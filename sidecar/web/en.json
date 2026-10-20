@@ -1,0 +1,48 @@
+{
+  "title": "Live Dutch → French",
+  "microphone": "Microphone",
+  "start": "Start",
+  "stop": "Stop",
+  "replayFile": "Test a WAV file",
+  "replay": "Play",
+  "captions": "Live captions",
+  "reset": "Clear captions",
+  "modelDownload": "Download the pinned Ultra and Dutch-to-French models once on this computer.",
+  "downloadModels": "Download models",
+  "empty": "Dutch transcription and French translation will appear here.",
+  "states": {
+    "warming": "Preparing models…",
+    "modelsMissing": "Models missing",
+    "downloading": "Downloading models…",
+    "starting": "Connecting microphone…",
+    "ready": "Ready",
+    "live": "Live",
+    "replay": "Playing test file",
+    "stopping": "Finishing the last sentence…",
+    "stopped": "Stopped",
+    "failed": "Unavailable"
+  },
+  "modes": {
+    "live": "Source: live microphone",
+    "replay": "Source: WAV file in real time",
+    "starting": "Connecting to the microphone",
+    "stopping": "Finishing the last audio segment",
+    "stopped": "No active source"
+  },
+  "defaultDevice": "Default microphone",
+  "preliminary": "Preliminary",
+  "updateDelay": "Update: {value} ms",
+  "queueDelay": "Queue: {value} ms",
+  "modelDelay": "Model: {value} ms",
+  "segment": "Audio: {value} s",
+  "errors": {
+    "permission": "The app could not access the microphone.",
+    "server": "The local transcription service is not responding.",
+    "processing": "This audio segment could not be processed.",
+    "overload": "Processing fell too far behind. Recording has stopped.",
+    "file": "Choose a readable WAV file.",
+    "startup": "The models could not be started. Check the log file for details.",
+    "appStartTitle": "Scribe Translate could not start",
+    "appStartBody": "The local transcription service could not be started."
+  }
+}
