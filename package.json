@@ -9,7 +9,7 @@
     "test": "node test/test_app.js && node scripts/python.cjs -m unittest discover -s test -p test_*.py",
     "build:sidecar": "node scripts/python.cjs scripts/build_sidecar.py",
     "build:mac": "npm run build:sidecar && electron-builder --mac dir --arm64",
-    "build:win": "npm run build:sidecar && electron-builder --win nsis --x64"
+    "build:win": "npm run build:sidecar && electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {
     "electron": "44.9.1",
