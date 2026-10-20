@@ -6,7 +6,7 @@
   "main": "main.cjs",
   "scripts": {
     "dev": "electron .",
-    "test": "node test/test_app.js && node scripts/python.cjs -m unittest test/test_server.py test/test_engine.py",
+    "test": "node test/test_app.js && node scripts/python.cjs -m unittest discover -s test -p test_*.py",
     "build:sidecar": "node scripts/python.cjs scripts/build_sidecar.py",
     "build:mac": "npm run build:sidecar && electron-builder --mac dir --arm64",
     "build:win": "npm run build:sidecar && electron-builder --win nsis --x64"
