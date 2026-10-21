@@ -9,6 +9,7 @@
   "approve_each_round": false,
   "best": {
     "round": 3,
+    "installer_bytes": 281664578,
     "bundle_bytes": 653638809
   },
   "train_ids": ["common_voice_nl_43060966"],
