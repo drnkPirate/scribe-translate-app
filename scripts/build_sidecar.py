@@ -21,21 +21,40 @@ def main():
     shutil.rmtree(WORK, ignore_errors=True)
     shutil.rmtree(OUTPUT, ignore_errors=True)
     separator = os.pathsep
+    silero = (
+        Path(importlib.util.find_spec("silero_vad").submodule_search_locations[0])
+        / "data"
+        / "silero_vad.jit"
+    )
+    transformer_models = Path(
+        importlib.util.find_spec("transformers.models").submodule_search_locations[0]
+    )
+    required_transformer_models = {"auto", "encoder_decoder", "marian"}
+    assert all((transformer_models / name).is_dir() for name in required_transformer_models)
     command = [
         sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--onedir",
         "--name", "scribe-translate-server",
         "--distpath", str(WORK / "dist"), "--workpath", str(WORK / "work"),
         "--specpath", str(WORK), "--paths", str(ROOT / "sidecar"),
         "--add-data", f"{ROOT / 'sidecar' / 'web'}{separator}web",
-        "--collect-all", "moondream", "--collect-all", "kestrel",
-        "--collect-all", "kestrel_native", "--collect-all", "kestrel_kernels",
-        "--collect-all", "ctranslate2",
-        "--collect-all", "silero_vad", "--collect-all", "sentencepiece",
+        "--add-data", f"{silero}{separator}silero_vad/data",
+        "--copy-metadata", "moondream",
+        "--hidden-import", "kestrel.models.parakeet_tdt.registration",
+        "--collect-all", "kestrel_kernels", "--collect-all", "sentencepiece",
+        "--exclude-module", "torch.onnx",
+        "--exclude-module", "torch.utils.tensorboard",
         str(ROOT / "sidecar" / "server.py"),
     ]
     for package in ("kestrel_mps_torch_ext", "kestrel_cuda"):
         if importlib.util.find_spec(package):
             command[-1:-1] = ["--collect-all", package]
+    for model in transformer_models.iterdir():
+        if (
+            model.is_dir()
+            and model.name not in required_transformer_models
+            and (model / "__init__.py").is_file()
+        ):
+            command[-1:-1] = ["--exclude-module", f"transformers.models.{model.name}"]
     subprocess.run(command, cwd=ROOT, check=True)
     shutil.copytree(WORK / "dist" / "scribe-translate-server", OUTPUT)
     shutil.copy2(ROOT / "sidecar" / "web" / "en.json", OUTPUT / "en.json")

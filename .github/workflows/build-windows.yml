@@ -33,6 +33,13 @@ jobs:
         run: npm test
       - name: Build installer
         run: npm run build:win
+      - name: Verify bundle and report installer size
+        shell: pwsh
+        run: |
+          .venv\Scripts\python scripts/check_bundle.py
+          $installer = Get-ChildItem "release/Scribe-Translate-*-Setup.exe" | Select-Object -First 1
+          "Installer bytes: $($installer.Length)"
+          "## Installer size`n`n$($installer.Length) bytes" >> $env:GITHUB_STEP_SUMMARY
       - name: Smoke-test installed app
         shell: pwsh
         run: |

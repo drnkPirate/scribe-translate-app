@@ -1,0 +1,29 @@
+{
+  "current_round": 3,
+  "reps": 1,
+  "goal": {
+    "target": "installer_bytes",
+    "direction": "lower",
+    "hold": ["functional", "output_identity"]
+  },
+  "approve_each_round": false,
+  "best": {
+    "round": 3,
+    "bundle_bytes": 653638809
+  },
+  "train_ids": ["common_voice_nl_43060966"],
+  "test_ids": [],
+  "harness_paths": [
+    "scripts/build_sidecar.py",
+    "scripts/smoke_windows_installer.ps1",
+    ".github/workflows/build-windows.yml"
+  ],
+  "metrics": [
+    {"id": "functional", "kind": "binary", "label": "Functional"},
+    {"id": "output_identity", "kind": "binary", "label": "Same output"}
+  ],
+  "perf_fields": [
+    {"id": "installer_bytes", "label": "Installer", "unit": "bytes"},
+    {"id": "bundle_bytes", "label": "Bundle", "unit": "bytes"}
+  ]
+}

@@ -1,0 +1,4 @@
+[
+  {"role":"user","content":"Process the fixed WAV fixture with the optimized packaged sidecar."},
+  {"role":"assistant","content":"{\"dutch\":\"Deze worden gekenmerkt door onzekerheid en mogelijke destabilisatie.\",\"french\":\"Elles sont caractérisées par une incertitude et une possible déstabilisation.\",\"model\":{\"asr\":\"moondream/parakeet-ultra\",\"translation\":\"Helsinki-NLP/opus-mt-nl-fr\",\"device\":\"mps\"}}"}
+]

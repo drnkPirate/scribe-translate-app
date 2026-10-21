@@ -1,0 +1,1 @@
+{"description":"Keep only the Transformers model families required for Marian conversion and tokenization","label":"Focused Transformers package","target":"code"}
