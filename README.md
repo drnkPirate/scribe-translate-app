@@ -2,15 +2,17 @@
 
 A standalone desktop app for live Dutch transcription with French captions. Audio, transcription, and translation stay on the computer.
 
-## Download for Windows
+## Download for Windows and macOS
 
 1. Open the [latest release](https://github.com/drnkPirate/scribe-translate-app/releases/latest).
-2. Download `Scribe-Translate-<version>-Setup.exe`.
-3. Run the installer and open **Scribe Translate**.
+2. Download `Scribe-Translate-<version>-Setup.exe` for Windows x64 or `Scribe-Translate-<version>-macOS-arm64.dmg` for an Apple silicon Mac.
+3. Run the Windows installer, or open the Mac disk image and drag **Scribe Translate** to **Applications**. Open the installed app.
 4. On first use, select **Download models**. The pinned models require about 1.5 GB.
 5. Select a microphone and press **Start**.
 
 Windows may show an unknown-publisher warning because the installer is not yet code-signed. Only use installers downloaded from this repository.
+
+The Mac app is not notarized by Apple. If macOS blocks it, use **System Settings → Privacy & Security → Open Anyway** after attempting to open it. Intel Macs are not supported.
 
 ## Use
 
@@ -54,7 +56,9 @@ Windows x64:
 npm run build:win
 ```
 
-`build_sidecar.py` packages only the Python runtime. The build fails if `model.safetensors` is accidentally included. GitHub Actions builds and smoke-tests the Windows installer on Windows.
+`build_sidecar.py` packages only the Python runtime. The build fails if `model.safetensors` is accidentally included. GitHub Actions builds and smoke-tests the Windows installer and macOS disk image on their native runners on every push to `main` and every `v*` tag. Manual runs are also available.
+
+To publish a release, update the version in `package.json` and `package-lock.json`, commit it, and push a matching `v<version>` tag. The release is published only after both platform builds and installation checks pass, with both installers attached. Re-running the workflow replaces the assets on the same release. Builds from `main` are available as workflow artifacts; releases before this workflow change only contain a Windows installer.
 
 ## Models
 

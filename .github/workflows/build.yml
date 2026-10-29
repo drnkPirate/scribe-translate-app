@@ -1,0 +1,102 @@
+name: Build and release desktop apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            runner: windows-latest
+            architecture: x64
+            platform: win
+            installer: release/*.exe
+          - name: macOS
+            runner: macos-15
+            architecture: arm64
+            platform: mac
+            installer: release/*.dmg
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: ${{ matrix.architecture }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          node scripts/python.cjs -m pip install -r requirements.txt
+          npm ci
+          node scripts/python.cjs scripts/create_icon.py
+      - name: Check
+        run: npm test
+      - name: Build installer
+        run: npm run build:${{ matrix.platform }}
+      - name: Verify bundle
+        run: node scripts/python.cjs scripts/check_bundle.py
+      - name: Report Windows installer size
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem "release/Scribe-Translate-*-Setup.exe" | Select-Object -First 1
+          "Installer bytes: $($installer.Length)"
+          "## Installer size`n`n$($installer.Length) bytes" >> $env:GITHUB_STEP_SUMMARY
+      - name: Smoke-test installed app
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem "release/Scribe-Translate-*-Setup.exe" | Select-Object -First 1).FullName
+          ./scripts/smoke_windows_installer.ps1 -Installer $installer
+      - name: Smoke-test macOS disk image
+        if: runner.os == 'macOS'
+        run: node scripts/python.cjs scripts/smoke_macos_installer.py release/*.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Scribe-Translate-${{ matrix.name }}
+          path: ${{ matrix.installer }}
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Scribe-Translate-*
+          path: release
+          merge-multiple: true
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 ||
+            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --generate-notes --title "Scribe Translate $GITHUB_REF_NAME"
+          gh release upload "$GITHUB_REF_NAME" release/*.exe release/*.dmg --clobber
+          gh release edit "$GITHUB_REF_NAME" --draft=false
