@@ -56,7 +56,7 @@ def main():
         ):
             command[-1:-1] = ["--exclude-module", f"transformers.models.{model.name}"]
     subprocess.run(command, cwd=ROOT, check=True)
-    shutil.copytree(WORK / "dist" / "scribe-translate-server", OUTPUT)
+    shutil.copytree(WORK / "dist" / "scribe-translate-server", OUTPUT, symlinks=True)
     shutil.copy2(ROOT / "sidecar" / "web" / "en.json", OUTPUT / "en.json")
     if os.name != "nt":
         library_dir = OUTPUT / "_internal" / "torch" / "lib"
