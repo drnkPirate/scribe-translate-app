@@ -22,6 +22,9 @@
       button { padding:0 18px; font-weight:700; cursor:pointer; }
       button.primary { background:var(--accent); color:#07101f; border-color:transparent; }
       button:disabled { opacity:.45; cursor:not-allowed; }
+      select:disabled { opacity:.6; cursor:not-allowed; }
+      .quality { margin-top:12px; padding:16px; border:1px solid var(--line); border-radius:18px; background:rgba(18,23,34,.72); }
+      .quality p { margin:8px 0 0; color:var(--muted); font-size:.86rem; }
       .replay { display:grid; grid-template-columns:1fr auto; gap:12px; margin-top:12px; padding:16px; border:1px solid var(--line); border-radius:18px; background:rgba(18,23,34,.72); }
       .model-setup { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:18px; padding:16px 18px; border:1px solid #52698d; border-radius:18px; background:#121a28; }
       .model-setup p { margin:0; color:var(--muted); }
@@ -51,6 +54,12 @@
         <div class="device"><label id="live-heading" for="device" data-i18n="microphone"></label><select id="device"></select></div>
         <button id="start" class="primary" type="button" data-i18n="start"></button>
         <button id="stop" type="button" data-i18n="stop"></button>
+      </section>
+      <section class="quality" aria-labelledby="quality-label">
+        <label id="quality-label" for="quality" data-i18n="processingEffort"></label>
+        <select id="quality" aria-describedby="quality-description quality-help"></select>
+        <p id="quality-description" aria-live="polite"></p>
+        <p id="quality-help" data-i18n="processingHelp"></p>
       </section>
       <section class="replay" aria-labelledby="replay-heading">
         <div><label id="replay-heading" for="file" data-i18n="replayFile"></label><input id="file" type="file" accept="audio/wav,.wav"></div>

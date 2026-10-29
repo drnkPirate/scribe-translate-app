@@ -20,6 +20,18 @@ French captions appear in large text with the recognized Dutch text underneath. 
 
 The models are stored in the user cache and are not included in Git, the installer, or the app bundle. After the first download, transcription and translation work offline.
 
+### Processing effort
+
+Choose a level in the app before starting the microphone or replaying a WAV file. The choice is saved locally and cannot change while audio is being processed.
+
+| Level | Preliminary update interval | Pause before finalising | Translation search |
+| --- | --- | --- | --- |
+| 1 · Fast (default, original behaviour) | 0.25 s | 0.65 s | 1 preliminary / 4 final candidates |
+| 2 · Balanced | 0.75 s | 1.0 s | 2 preliminary / 6 final candidates |
+| 3 · Thorough | 1.5 s | 1.3 s | 4 preliminary / 8 final candidates |
+
+These are audio scheduling thresholds, not guaranteed response times. Higher levels keep short pauses within the same sentence and spend more computation searching for a translation. Speech recognition still uses the same pinned model, and segments remain limited to 12 seconds. Better wording is possible but not guaranteed; compare the same WAV file at different levels on your computer.
+
 ## Supported systems
 
 - Windows 11 x64. An NVIDIA GPU is the recommended and tested Photon configuration. The app selects CUDA when available and otherwise falls back to CPU; near-real-time performance without NVIDIA is not guaranteed.

@@ -24,10 +24,12 @@ from scipy.signal import resample_poly
 MAX_BODY_BYTES = 3 * 1024 * 1024
 MAX_AUDIO_SECONDS = 30
 WEB_ROOT = Path(__file__).with_name("web")
+PROCESSING = json.loads((WEB_ROOT / "processing.json").read_text())
 STATIC_FILES = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/en.json": ("en.json", "application/json; charset=utf-8"),
+    "/processing.json": ("processing.json", "application/json; charset=utf-8"),
 }
 
 
@@ -168,6 +170,10 @@ def create_server(address: tuple[str, int], state: CaptionState) -> ThreadingHTT
             if partial_header not in {None, "0", "1"}:
                 self._send_json(400, {"error": "invalid_partial"})
                 return
+            quality = self.headers.get("X-Caption-Quality", PROCESSING["default"])
+            if quality not in PROCESSING["profiles"]:
+                self._send_json(400, {"error": "invalid_quality"})
+                return
             try:
                 length = int(self.headers.get("Content-Length", ""))
             except ValueError:
@@ -186,7 +192,7 @@ def create_server(address: tuple[str, int], state: CaptionState) -> ThreadingHTT
                 if len(body) != length:
                     raise ValueError("invalid_audio")
                 audio = _decode_wav(body)
-                result = state.pipeline.process(audio, partial=partial_header == "1")
+                result = state.pipeline.process(audio, partial=partial_header == "1", quality=quality)
                 self._send_json(200, result)
             except (TimeoutError, socket.timeout):
                 self.close_connection = True

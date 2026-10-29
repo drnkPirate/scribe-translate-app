@@ -1,6 +1,6 @@
 {
   "name": "scribe-translate-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Local Dutch transcription with live French captions",
   "main": "main.cjs",

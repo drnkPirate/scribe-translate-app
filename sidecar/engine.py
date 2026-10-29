@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import sys
@@ -13,6 +14,7 @@ from pathlib import Path
 import numpy as np
 
 
+PROCESSING = json.loads((Path(__file__).with_name("web") / "processing.json").read_text())
 ASR_MODEL = "moondream/parakeet-ultra"
 ASR_REVISION = "73175eb7aeb0d82f1e2a6b53b3aabc10a90bcd0b"
 TRANSLATION_MODEL = "Helsinki-NLP/opus-mt-nl-fr"
@@ -149,8 +151,9 @@ class Pipeline:
             raise RuntimeError("invalid transcription response")
         return result["text"].strip()
 
-    def translate(self, text, *, partial=False):
+    def translate(self, text, *, partial=False, quality=PROCESSING["default"]):
         started = time.perf_counter()
+        profile = PROCESSING["profiles"][quality]
         text = unicodedata.normalize("NFKC", text).replace("\u2019", "'").replace("\u2018", "'")
         if not text.strip():
             return "", 0.0, {"input_tokens": 0, "output_tokens": 0}
@@ -164,7 +167,7 @@ class Pipeline:
         if any(len(source) > 480 for source in sources):
             raise ValueError("translation input exceeds 480 tokens")
         results = self.translator.translate_batch(
-            sources, beam_size=1 if partial else 4, max_batch_size=1,
+            sources, beam_size=profile["partial_beam_size" if partial else "final_beam_size"], max_batch_size=1,
             max_input_length=0, max_decoding_length=128 if partial else 256,
             return_end_token=True,
         )
@@ -186,7 +189,7 @@ class Pipeline:
             raise RuntimeError("empty translation")
         return " ".join(translated), time.perf_counter() - started, usage
 
-    def process(self, audio, *, partial=False):
+    def process(self, audio, *, partial=False, quality=PROCESSING["default"]):
         audio = np.asarray(audio, dtype=np.float32)
         started = time.perf_counter()
         prepared, silent, gain = prepare_audio(audio, self.vad, self.detect_speech)
@@ -194,7 +197,7 @@ class Pipeline:
         if not any(character.isalnum() for character in dutch):
             dutch = ""
         asr_seconds = time.perf_counter() - started
-        french, translation_seconds, usage = self.translate(dutch, partial=partial)
+        french, translation_seconds, usage = self.translate(dutch, partial=partial, quality=quality)
         return {
             "dutch": dutch,
             "french": french,
@@ -207,5 +210,6 @@ class Pipeline:
             "status": "silence" if silent else "ok",
             "gain": gain,
             "partial": partial,
+            "quality": quality,
             "translation_pending": bool(usage.get("truncated")),
         }

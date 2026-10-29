@@ -1,0 +1,23 @@
+{
+  "default": "fast",
+  "profiles": {
+    "fast": {
+      "partial_interval_s": 0.25,
+      "silence_s": 0.65,
+      "partial_beam_size": 1,
+      "final_beam_size": 4
+    },
+    "balanced": {
+      "partial_interval_s": 0.75,
+      "silence_s": 1.0,
+      "partial_beam_size": 2,
+      "final_beam_size": 6
+    },
+    "thorough": {
+      "partial_interval_s": 1.5,
+      "silence_s": 1.3,
+      "partial_beam_size": 4,
+      "final_beam_size": 8
+    }
+  }
+}

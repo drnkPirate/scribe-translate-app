@@ -30,9 +30,9 @@ class FakePipeline:
     def __init__(self):
         self.audio = []
 
-    def process(self, audio, partial=False):
+    def process(self, audio, partial=False, quality="fast"):
         self.audio.append(audio)
-        return {"dutch": "goed", "french": "bien", "duration_s": 0.1, "partial": partial}
+        return {"dutch": "goed", "french": "bien", "duration_s": 0.1, "partial": partial, "quality": quality}
 
 
 class ServerTest(unittest.TestCase):
@@ -66,6 +66,26 @@ class ServerTest(unittest.TestCase):
         self.assertEqual((status, result["dutch"], result["french"], result["partial"]), (200, "goed", "bien", True))
         self.assertEqual(self.pipeline.audio[0].dtype, np.float32)
         self.assertEqual(self.pipeline.audio[0].shape, (1600,))
+        self.assertEqual(result["quality"], "fast")
+
+    def test_processing_modes_are_available_and_validated_before_inference(self):
+        status, settings, _ = self.request("GET", "/processing.json")
+        self.assertEqual(status, 200)
+        self.assertEqual(list(settings["profiles"]), ["fast", "balanced", "thorough"])
+        for quality in ("fast", "balanced", "thorough"):
+            with self.subTest(quality=quality):
+                status, result, _ = self.request(
+                    "POST", "/api/caption", wav([100, -100] * 200),
+                    {"Content-Type": "audio/wav", "X-Caption-Quality": quality},
+                )
+                self.assertEqual((status, result["quality"]), (200, quality))
+        for quality in ("unknown", "", "__proto__"):
+            status, result, _ = self.request(
+                "POST", "/api/caption", wav([100, -100] * 200),
+                {"Content-Type": "audio/wav", "X-Caption-Quality": quality},
+            )
+            self.assertEqual((status, result), (400, {"error": "invalid_quality"}))
+        self.assertEqual(len(self.pipeline.audio), 3)
 
     def test_status_identifies_the_local_service(self):
         status, result, headers = self.request("GET", "/api/status")

@@ -1,6 +1,22 @@
 {
   "title": "Live Dutch → French",
   "microphone": "Microphone",
+  "processingEffort": "Processing effort",
+  "processingHelp": "Choose before starting. Your choice is saved on this computer. Higher levels may improve wording, but do not guarantee better recognition or translation.",
+  "processingProfiles": {
+    "fast": {
+      "label": "1 · Fast",
+      "description": "The original behaviour: frequent preliminary captions and short pauses before finalising a sentence."
+    },
+    "balanced": {
+      "label": "2 · Balanced",
+      "description": "Waits a little longer for sentence endings and considers more translations. Captions appear less frequently."
+    },
+    "thorough": {
+      "label": "3 · Thorough",
+      "description": "Allows longer pauses within a sentence and spends more time comparing translations. Expect slower caption updates."
+    }
+  },
   "start": "Start",
   "stop": "Stop",
   "replayFile": "Test a WAV file",

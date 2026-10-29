@@ -4,10 +4,13 @@ const $ = (id) => document.getElementById(id);
 const elements = {
   state: $("state"), mode: $("mode"), error: $("error"), captions: $("captions"),
   device: $("device"), start: $("start"), stop: $("stop"), file: $("file"), replay: $("replay"),
-  modelSetup: $("model-setup"), download: $("download"), reset: $("reset")
+  modelSetup: $("model-setup"), download: $("download"), reset: $("reset"),
+  quality: $("quality"), qualityDescription: $("quality-description")
 };
 
 let messages;
+let processing;
+let quality;
 let ready = false;
 let session = 0;
 let source = null;
@@ -36,12 +39,34 @@ function setState(name) {
   elements.stop.disabled = source === null;
   elements.replay.disabled = !ready || source !== null;
   elements.reset.disabled = source !== null;
+  elements.quality.disabled = source !== null;
   elements.download.disabled = ["downloading", "warming", "ready"].includes(modelPhase);
   elements.modelSetup.hidden = modelPhase === "ready";
 }
 
 function setError(message = "") {
   elements.error.textContent = message;
+}
+
+function setQuality(value) {
+  if (source !== null) { elements.quality.value = quality; return; }
+  quality = Object.hasOwn(processing.profiles, value) ? value : processing.default;
+  elements.quality.value = quality;
+  elements.qualityDescription.textContent = text(`processingProfiles.${quality}.description`);
+  try { localStorage.setItem("processing-quality", quality); } catch { /* The choice still applies to this session. */ }
+}
+
+function initializeQuality() {
+  for (const name of Object.keys(processing.profiles)) {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = text(`processingProfiles.${name}.label`);
+    elements.quality.append(option);
+  }
+  let saved;
+  try { saved = localStorage.getItem("processing-quality"); } catch { /* Use the default when storage is unavailable. */ }
+  setQuality(saved);
+  elements.quality.addEventListener("change", () => setQuality(elements.quality.value));
 }
 
 function showEmpty() {
@@ -113,12 +138,12 @@ function encodeWav(samples, sampleRate) {
   return buffer;
 }
 
-function makeSegmenter(sampleRate, onSegment, intervalSeconds = 0.25) {
+function makeSegmenter(sampleRate, onSegment, profile = processing.profiles[quality]) {
   // Energy bounds capture; the server applies trained speech detection before recognition.
   const threshold = 0.001;
   const preRollLimit = Math.round(sampleRate * 0.3);
-  const partialInterval = Math.round(sampleRate * intervalSeconds);
-  const silenceLimit = Math.round(sampleRate * 0.65);
+  const partialInterval = Math.round(sampleRate * profile.partial_interval_s);
+  const silenceLimit = Math.round(sampleRate * profile.silence_s);
   const maximum = Math.round(sampleRate * 12);
   let parts = [];
   let length = 0;
@@ -177,6 +202,7 @@ async function sendSegment(item) {
     const response = await fetch("/api/caption", {
       method: "POST", headers: {
         "Content-Type": "audio/wav",
+        "X-Caption-Quality": item.quality,
         ...(item.final ? {} : {"X-Caption-Partial": "1"})
       },
       body: encodeWav(item.samples, item.sampleRate), signal: currentController.signal
@@ -218,7 +244,7 @@ async function drainQueue() {
 function enqueue(snapshot, activeSession) {
   if (activeSession !== session) return;
   const utteranceId = `${activeSession}:${snapshot.utteranceId}`;
-  const item = {...snapshot, utteranceId, session: activeSession, enqueuedAt: performance.now()};
+  const item = {...snapshot, quality, utteranceId, session: activeSession, enqueuedAt: performance.now()};
   if (!item.final && ((currentItem?.utteranceId === utteranceId && currentItem.final) || queue.some((queued) => queued.utteranceId === utteranceId && queued.final))) return;
   if (item.final && [currentItem, ...queue].filter((queued) => queued?.session === activeSession && queued.final).length >= 2) {
     session += 1;
@@ -391,7 +417,10 @@ async function downloadModels() {
 }
 
 async function initialize() {
-  messages = await fetch("/en.json").then((response) => response.json());
+  [messages, processing] = await Promise.all([
+    fetch("/en.json").then((response) => response.json()),
+    fetch("/processing.json").then((response) => response.json())
+  ]);
   document.querySelectorAll("[data-i18n]").forEach((element) => { element.textContent = text(element.dataset.i18n); });
   elements.captions.setAttribute("aria-label", text("captions"));
   elements.start.addEventListener("click", start);
@@ -399,6 +428,7 @@ async function initialize() {
   elements.replay.addEventListener("click", replay);
   elements.reset.addEventListener("click", resetCaptions);
   elements.download.addEventListener("click", downloadModels);
+  initializeQuality();
   showEmpty();
   setState("warming");
   try { await listDevices(); } catch { /* Device labels become available after explicit start. */ }
